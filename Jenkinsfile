@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     environment {
@@ -9,6 +10,11 @@ pipeline {
 
         FRONTEND_REPO = 'goal-tracker/frontend'
         BACKEND_REPO  = 'goal-tracker/backend'
+
+        DOCKERHUB_USERNAME = 'shubhamkah'
+
+        DOCKERHUB_FRONTEND = "${DOCKERHUB_USERNAME}/goal-tracker-frontend:1.0"
+        DOCKERHUB_BACKEND  = "${DOCKERHUB_USERNAME}/goal-tracker-backend:1.0"
     }
 
     stages {
@@ -24,35 +30,45 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
-                    echo "Building images with tag: ${env.IMAGE_TAG}"
+                    echo "Using image tag: ${env.IMAGE_TAG}"
                 }
             }
         }
 
-        stage('Build Frontend') {
+        stage('Pull Images from Docker Hub') {
             steps {
                 sh '''
                     set -e
 
-                    echo "Building frontend Docker image..."
+                    echo "Pulling frontend image from Docker Hub..."
+                    docker pull ${DOCKERHUB_FRONTEND}
 
-                    docker build \
-                      -t ${ECR_REGISTRY}/${FRONTEND_REPO}:${IMAGE_TAG} \
-                      ./frontend
+                    echo "Pulling backend image from Docker Hub..."
+                    docker pull ${DOCKERHUB_BACKEND}
+
+                    echo "Docker Hub images pulled successfully."
                 '''
             }
         }
 
-        stage('Build Backend') {
+        stage('Tag Images for ECR') {
             steps {
                 sh '''
                     set -e
 
-                    echo "Building backend Docker image..."
+                    echo "Tagging frontend image for ECR..."
 
-                    docker build \
-                      -t ${ECR_REGISTRY}/${BACKEND_REPO}:${IMAGE_TAG} \
-                      ./backend
+                    docker tag \
+                      ${DOCKERHUB_FRONTEND} \
+                      ${ECR_REGISTRY}/${FRONTEND_REPO}:${IMAGE_TAG}
+
+                    echo "Tagging backend image for ECR..."
+
+                    docker tag \
+                      ${DOCKERHUB_BACKEND} \
+                      ${ECR_REGISTRY}/${BACKEND_REPO}:${IMAGE_TAG}
+
+                    echo "Images tagged successfully."
                 '''
             }
         }
@@ -123,6 +139,7 @@ pipeline {
     }
 
     post {
+
         success {
             echo '========================================'
             echo 'CI PIPELINE COMPLETED SUCCESSFULLY'
