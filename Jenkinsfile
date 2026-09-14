@@ -24,7 +24,7 @@ pipeline {
                 checkout scm
 
                 script {
-                    // Use the Git commit SHA as an immutable Docker tag
+                    // Use Git commit SHA as immutable Docker tag
                     env.IMAGE_TAG = sh(
                         script: 'git rev-parse --short=12 HEAD',
                         returnStdout: true
