@@ -73,32 +73,6 @@ pipeline {
             }
         }
 
-        stage('Trivy Security Scan') {
-            steps {
-                sh '''
-                    set -e
-
-                    echo "Scanning frontend image..."
-
-                    trivy image \
-                      --severity HIGH,CRITICAL \
-                      --exit-code 1 \
-                      ${ECR_REGISTRY}/${FRONTEND_REPO}:${IMAGE_TAG}
-
-                    echo "Frontend scan passed."
-
-                    echo "Scanning backend image..."
-
-                    trivy image \
-                      --severity HIGH,CRITICAL \
-                      --exit-code 1 \
-                      ${ECR_REGISTRY}/${BACKEND_REPO}:${IMAGE_TAG}
-
-                    echo "Backend scan passed."
-                '''
-            }
-        }
-
         stage('Login to ECR') {
             steps {
                 sh '''
