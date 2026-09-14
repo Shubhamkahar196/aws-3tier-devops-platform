@@ -129,8 +129,8 @@ module "ec2" {
   frontend_ecr_repository_url = module.ecr.frontend_repository_url
   backend_ecr_repository_url  = module.ecr.backend_repository_url
 
-  frontend_image_tag = "1.0"
-  backend_image_tag  = "1.0"
+  frontend_image_tag = "e07ce7d99a99"
+  backend_image_tag  = "e07ce7d99a99"
 
 
   # Database
